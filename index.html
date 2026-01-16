@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LMZG BIS 2026 - Opération Nantes</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        .animate-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        .slide-in-from-bottom-4 {
+            animation: slideInUp 0.5s ease-out;
+        }
+        .slide-in-from-bottom-10 {
+            animation: slideInUp 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideInUp {
+            from { 
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .group:hover .group-hover\:translate-x-1 {
+            transform: translateX(4px);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+
+        const Icon = ({ name, size = 24, className = "", fill = "none" }) => {
+            const icons = {
+                Search: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>,
+                Zap: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>,
+                Target: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="12" r="5"></circle><circle cx="12" cy="12" r="9"></circle></svg>,
+                Clock: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>,
+                MapIcon: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" y1="3" x2="9" y2="18"></line><line x1="15" y1="6" x2="15" y2="21"></line></svg>,
+                Globe: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>,
+                FileText: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="13" x2="12" y2="17"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>,
+                Music: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>,
+                UserCheck: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg>,
+                X: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>,
+            };
+            return icons[name] || null;
+        };
+
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('dashboard');
+            const [searchTerm, setSearchTerm] = useState('');
+            const [repertoireSearch, setRepertoireSearch] = useState('');
+            const [selectedExposant, setSelectedExposant] = useState(null);
+
+            const URL_PLAN_PDF = "https://drive.google.com/file/d/1C1FCOo8O20qCn6DRymQ9bztBWjEvGzbp/view?usp=sharing";
+            const URL_CATALOGUE = "https://drive.google.com/file/d/1QIwL2uPUQG_PvfHINxfCIrTFgFkUhHEY/view?usp=sharing";
+
+            const fullRepertoire = [
+                { 
+                    stand: "212", name: "ELECTRO BOOKING", 
+                    team: "Stéphane Viard (Directeur), Agathe B. (Booking)", 
+                    genres: ["Electro", "Techno", "Live Acts"],
+                    website: "https://www.electrobooking.com",
+                    artists: ["Boris Brejcha", "Worakls", "N'to", "Joachim Pastor", "Rodriguez Jr.", "Jan Blomqvist"],
+                    briefing: "L'agence de référence pour les clubs allemands et européens. Ils cherchent des 'Live Acts' organiques pour casser la monotonie des DJ sets.",
+                    angle: "Pitch : 'The energy of a brass band, the bpm of a club'. Insister sur le côté 'Ready-to-play' en festival electro."
+                },
+                { 
+                    stand: "242", name: "TOURNY PRODUCTIONS", 
+                    team: "Antoine Glatard, Pierre-O. J.", 
+                    genres: ["Fanfares", "World", "Groove"],
+                    website: "https://www.tourny-productions.fr",
+                    artists: ["Deluxe", "Meute", "L'Entourloop", "La Caravane Passe", "Soviet Suprem", "Guts"],
+                    briefing: "Ancien partenaire de gros festivals d'été. Ils sont les rois du 'Groove qui tâche'. Ils ont la force de frappe pour vous placer en Main Stage.",
+                    angle: "Parlez de la facilité technique du set LMZG. Montrez que vous êtes les cousins 'Swing' de Meute."
+                },
+                { 
+                    stand: "243", name: "BLEU CITRON", 
+                    team: "Sylvain Bouton, Samuel Capus", 
+                    genres: ["Pop", "Chanson", "Urbain"],
+                    website: "https://www.bleucitron.net",
+                    artists: ["Soprano", "Adé", "Bigflo & Oli", "Zaho de Sagazan", "Pierre de Maere", "Izia"],
+                    briefing: "Le mastodonte du Sud. Ils produisent des tournées nationales massives. Ils ont besoin de projets 'catchy' qui fédèrent visuellement.",
+                    angle: "Montrez la vidéo live du dernier festival. Ici, c'est l'image et la capacité de fédérer qui comptent."
+                },
+                { 
+                    stand: "318", name: "DIXIT", 
+                    team: "Julien Banes (Export), Thomas R.", 
+                    genres: ["Electro-Swing", "Jazz-Fusion", "Export"],
+                    website: "https://www.dixit-production.com",
+                    artists: ["Caravan Palace", "Parov Stelar (Export)", "Club des Belugas", "Alice Francis"],
+                    briefing: "Spécialistes mondiaux de l'Electro-Swing et de l'export pur. Ils travaillent énormément avec l'Allemagne et le Canada.",
+                    angle: "Mentionnez vos stats Spotify et vos 45k followers. C'est votre argument n°1 pour l'international."
+                },
+                { 
+                    stand: "378", name: "EASTERN BEATS", 
+                    team: "Dragan S., Milos V.", 
+                    genres: ["Balkan Brass", "Electro-World"],
+                    website: "https://www.easternbeats.com",
+                    artists: ["Shantel", "Fanfare Ciocarlia", "Boban Markovic Orchestra"],
+                    briefing: "Le hub européen pour les sonorités Balkaniques. Basés à Berlin, ils gèrent le circuit des pays de l'Est.",
+                    angle: "Proposez une tournée de 5 dates tests en Pologne/Hongrie. 'Le renouveau du Swing Balkanique'."
+                },
+                { stand: "391", name: "3C", team: "Denis Lefebvre", genres: ["Chanson", "Rock"], website: "https://www.3cprom.com", artists: ["Vianney", "Shaka Ponk"] },
+                { stand: "339", name: "A GAUCHE DE LA LUNE", team: "Frédéric P.", genres: ["Rock", "Metal"], website: "https://www.agauchedelalune.com", artists: ["Skip The Use", "Mass Hysteria"] },
+                { stand: "219", name: "100 NOMS EN TOURNEE", team: "Thierry M.", genres: ["Humour"], website: "https://www.100noms.fr", artists: ["Gérémy Crédeville"] },
+                { stand: "242", name: "ART SCÉNIQUE", team: "Jacques Protat", genres: ["Jazz", "World"], website: "https://www.artscenique.fr", artists: ["Ibrahim Maalouf"] },
+                { stand: "304", name: "WORLD CIRCUITS", team: "Nick Gold", genres: ["World Music"], website: "https://www.worldcircuits.com", artists: ["Fatoumata Diawara"] },
+                { stand: "288", name: "20H40 PRODUCTIONS", team: "Christophe M.", genres: ["Humour"], website: "https://www.20h40.fr", artists: ["Alex Lutz"] },
+                { stand: "323", name: "1988", team: "Romain G.", genres: ["Electro"], website: "https://www.1988.fr" },
+                { stand: "325", name: "A FILETTA", team: "Jean-Claude A.", genres: ["Polyphonie"], website: "https://www.afiletta.com" },
+                { stand: "204", name: "A FLEUR DE SONS", team: "Franck Alcaras", genres: ["Chanson"], website: "https://www.afleurdesons.fr" },
+                { stand: "385", name: "ACCORDS CROISÉS", team: "Saïd A.", genres: ["World"], website: "https://www.accords-croises.com" }
+            ];
+
+            const filteredTargets = useMemo(() => {
+                return fullRepertoire.filter(item => item.briefing && item.name.toLowerCase().includes(searchTerm.toLowerCase()));
+            }, [searchTerm]);
+
+            const filteredRepertoire = useMemo(() => {
+                return fullRepertoire.filter(item => 
+                    item.name.toLowerCase().includes(repertoireSearch.toLowerCase()) || 
+                    item.stand.includes(repertoireSearch)
+                );
+            }, [repertoireSearch]);
+
+            return (
+                <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-20">
+                    <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+                        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center text-white font-black italic text-xl shadow-lg">L</div>
+                                <div className="hidden sm:block">
+                                    <h1 className="text-sm font-black uppercase tracking-tighter leading-none">LMZG BIS 2026</h1>
+                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Opération Nantes</p>
+                                </div>
+                            </div>
+                            <nav className="flex bg-slate-100 p-1 rounded-xl gap-1">
+                                {['dashboard', 'repertoire', 'coach', 'docs'].map(tab => (
+                                    <button 
+                                        key={tab}
+                                        onClick={() => setActiveTab(tab)}
+                                        className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${activeTab === tab ? 'bg-white shadow-sm text-amber-600' : 'text-slate-500 hover:text-slate-700'}`}
+                                    >
+                                        {tab === 'dashboard' ? 'Cibles' : tab === 'repertoire' ? 'Répertoire' : tab === 'coach' ? 'Tactique' : 'Pratique'}
+                                    </button>
+                                ))}
+                            </nav>
+                        </div>
+                    </header>
+
+                    <main className="max-w-6xl mx-auto px-4 pt-8">
+                        {activeTab === 'dashboard' && (
+                            <div className="space-y-6 animate-in fade-in duration-500">
+                                <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                                    <div className="p-4 border-b border-slate-100 bg-slate-50/50">
+                                        <div className="relative">
+                                            <Icon name="Search" size={16} className="absolute left-3 top-2.5 text-slate-400"/>
+                                            <input type="text" placeholder="Filtrer mes cibles..." className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl text-sm outline-none" onChange={(e) => setSearchTerm(e.target.value)}/>
+                                        </div>
+                                    </div>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-left">
+                                            <tbody className="divide-y divide-slate-100 text-sm">
+                                                {filteredTargets.map(item => (
+                                                    <tr key={item.stand} onClick={() => setSelectedExposant(item)} className="hover:bg-amber-50/50 transition-all cursor-pointer group">
+                                                        <td className="px-6 py-4">
+                                                            <span className="px-2 py-1 rounded text-[9px] font-black border bg-amber-100 text-amber-700 border-amber-200 uppercase tracking-tighter shadow-sm">Prio High</span>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="font-bold text-slate-900 group-hover:translate-x-1 transition-transform uppercase tracking-tighter">{item.name}</div>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="w-12 mx-auto py-1 font-mono font-black text-white bg-slate-800 rounded-lg text-center shadow-md">{item.stand}</div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'repertoire' && (
+                            <div className="space-y-6 animate-in fade-in duration-500">
+                                <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                                    <div className="p-4 border-b border-slate-100 bg-slate-50/50">
+                                        <input type="text" placeholder="Chercher un tourneur (nom ou stand)..." className="w-full pl-4 pr-4 py-2 border border-slate-200 rounded-xl text-sm outline-none" onChange={(e) => setRepertoireSearch(e.target.value)} />
+                                    </div>
+                                    <div className="max-h-[60vh] overflow-y-auto">
+                                        <table className="w-full text-left">
+                                            <tbody className="divide-y divide-slate-100 text-sm">
+                                                {filteredRepertoire.map((item, index) => (
+                                                    <tr key={index} onClick={() => setSelectedExposant(item)} className="hover:bg-slate-50 transition-colors cursor-pointer group">
+                                                        <td className="px-6 py-3 font-mono font-black text-slate-400 w-24">{item.stand}</td>
+                                                        <td className="px-6 py-3 font-medium text-slate-600 italic">
+                                                            {item.name} {item.briefing && <Icon name="Zap" size={10} className="inline ml-1 text-amber-500" fill="currentColor"/>} 
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'coach' && (
+                            <div className="max-w-2xl mx-auto space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+                                <div className="bg-slate-900 text-white p-10 rounded-[2.5rem] shadow-xl relative overflow-hidden border-b-8 border-amber-500">
+                                    <Icon name="Zap" size={200} className="absolute right-[-20px] bottom-[-20px] text-white/5" />
+                                    <h2 className="text-2xl font-black mb-4 flex items-center gap-3 italic tracking-tight"><Icon name="Zap" size={24} className="text-amber-500" fill="currentColor"/> BRIEFING OPÉRATIONNEL</h2>
+                                    <p className="text-slate-400 text-sm leading-relaxed font-medium">
+                                        "Ne parlez pas musique, parlez <span className="text-white border-b-2 border-amber-500">stratégie de remplissage</span>. Les tourneurs ici veulent des projets qui tournent seuls."
+                                    </p>
+                                </div>
+
+                                <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-4 shadow-sm">
+                                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2"><Icon name="Clock" size={14}/> Planning Recommandé</h3>
+                                    {[
+                                        { h: "09:30", t: "Focus Electro Booking (212)", s: "Moins de monde, Stéphane est plus dispo." },
+                                        { h: "11:00", t: "Passage Stand 242", s: "Tourny / Art Scénique. Soyez percutants." },
+                                        { h: "15:00", t: "Le 'Mastodonte' (243)", s: "Bleu Citron. Attendez le bon moment." }
+                                    ].map((step, i) => (
+                                        <div key={i} className="flex gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                            <div className="font-black text-amber-600 text-xs">{step.h}</div>
+                                            <div>
+                                                <div className="text-sm font-black text-slate-800">{step.t}</div>
+                                                <div className="text-[11px] text-slate-500 italic leading-none mt-1">{step.s}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'docs' && (
+                            <div className="space-y-6 animate-in fade-in duration-500 max-w-2xl mx-auto text-center">
+                                <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-6">
+                                    <Icon name="MapIcon" size={48} className="mx-auto text-amber-500 mb-2"/>
+                                    <h3 className="font-black text-xl uppercase tracking-tighter">Accès aux documents officiels</h3>
+                                    <p className="text-slate-500 text-sm italic">Consultez les fichiers PDF partagés pour une navigation hors-ligne optimale.</p>
+                                    
+                                    <div className="flex flex-col gap-3">
+                                        <a href={URL_PLAN_PDF} target="_blank" className="bg-slate-900 text-white p-5 rounded-2xl font-black uppercase text-xs tracking-widest flex items-center justify-center gap-3 hover:bg-amber-600 transition-colors shadow-lg shadow-amber-200/20">
+                                            <Icon name="MapIcon" size={18}/> Ouvrir le plan interactif
+                                        </a>
+                                        <a href={URL_CATALOGUE} target="_blank" className="bg-white text-slate-900 border-2 border-slate-100 p-5 rounded-2xl font-black uppercase text-xs tracking-widest flex items-center justify-center gap-3 hover:border-amber-500 transition-all">
+                                            <Icon name="FileText" size={18}/> Catalogue des 248 tourneurs
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                    </main>
+
+                    {selectedExposant && (
+                        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
+                            <div className="bg-white w-full max-w-xl rounded-t-[3rem] sm:rounded-[3rem] shadow-2xl overflow-hidden animate-in slide-in-from-bottom-10 duration-500 flex flex-col max-h-[92vh]">
+                                <div className="p-6 bg-slate-900 text-white flex items-center justify-between border-b-4 border-amber-500">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-14 h-14 bg-amber-500 rounded-2xl flex items-center justify-center font-black italic text-2xl shadow-inner">{selectedExposant.stand}</div>
+                                        <div className="font-black text-xl uppercase tracking-tighter leading-none">{selectedExposant.name}</div>
+                                    </div>
+                                    <button onClick={() => setSelectedExposant(null)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><Icon name="X" size={24}/></button>
+                                </div>
+                                
+                                <div className="p-8 space-y-8 overflow-y-auto">
+                                    {selectedExposant.briefing && (
+                                        <div className="bg-amber-50 border-2 border-amber-200 p-6 rounded-[2.5rem] relative overflow-hidden">
+                                            <Icon name="Zap" size={100} className="absolute right-[-15px] top-[-15px] text-amber-200/30" />
+                                            <h4 className="text-[11px] font-black text-amber-800 uppercase mb-3 tracking-[0.2em] flex items-center gap-2"><Icon name="Target" size={14}/> Briefing</h4>
+                                            <p className="text-sm text-amber-950 font-bold italic leading-relaxed mb-4">"{selectedExposant.briefing}"
+                                            </p>
+                                            <div className="bg-white/70 p-3 rounded-2xl text-[11px] text-amber-900 font-bold border border-amber-100">
+                                                <span className="text-amber-600 uppercase mr-2">Tactique :</span> {selectedExposant.angle}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="space-y-6">
+                                        <div className="space-y-2">
+                                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Icon name="UserCheck" size={14}/> Équipe</h4>
+                                            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 font-bold text-sm text-slate-800">{selectedExposant.team || "Voir catalogue"}</div>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Icon name="Music" size={14}/> Artistes</h4>
+                                            <div className="flex flex-wrap gap-2">
+                                                {selectedExposant.artists?.map((art, idx) => (
+                                                    <span key={idx} className="bg-white text-slate-800 px-3 py-1.5 rounded-xl text-[11px] font-bold border border-slate-200 shadow-sm">{art}</span>
+                                                )) || <span className="text-xs text-slate-400 italic">Consulter le stand.</span>}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-col gap-3 pt-4 border-t border-slate-100">
+                                        {selectedExposant.website && (
+                                            <a href={selectedExposant.website} target="_blank" className="bg-blue-600 text-white p-4 rounded-2xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 hover:bg-blue-700">
+                                                <Icon name="Globe" size={16}/> Site Officiel
+                                            </a>
+                                        )}
+                                        <a href={URL_PLAN_PDF} target="_blank" className="bg-slate-900 text-white p-4 rounded-2xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 hover:bg-amber-600 shadow-xl">
+                                            <Icon name="MapIcon" size={16}/> Localiser Stand {selectedExposant.stand}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <footer className="max-w-6xl mx-auto px-4 mt-8 pb-12 text-center text-slate-400 text-[9px] font-black tracking-[0.4em] uppercase italic border-t border-slate-100 pt-8">
+                        © 2026 LMZG - RENSEIGNEMENT OPÉRATIONNEL • NANTES BIS
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
